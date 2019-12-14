@@ -2,24 +2,15 @@ const path = require('path');
 const mysql = require('mysql')
 const express = require('express');
 const app = express();
-var nombre = "";
-var conexionesActivas  = 0;
 const mensajero = mysql.createConnection({
-  host: '74.208.166.96',
-  user: 'asys',
-  password: '1nt3gr4*2019',
-  port: 5543,
-  database: 'simulador'
-});
+        host: '74.208.166.96',
+        user: 'asys',
+        password: '1nt3gr4*2019',
+        port: 5543,
+        database: 'simulador'
+      });
 
-var roomAbiertas = [ ];
 var usuariosActivos = [ ];
-
-app.get('/name/:name', function(req, res){
-  //res.send('name: ' + req.query.name);
-  nombre =  req.params.name;
-});
-
 //inicializa el servoidor
 //settieng
 app.set('port', process.env.PORT || 3000);
@@ -33,27 +24,7 @@ const server  = app.listen(app.get('port'), () => {
 //websocket
 const SocketIO = require('socket.io');
 const io = SocketIO(server);
-
 var numUsers = 0;
-
-function addRoom(id_room){
-  let participantes = 0;
-  if(roomAbiertas.length > 0) {
-    roomAbiertas.forEach(function(room) {
-      if(room.id_room == id_room){
-        room.partcipantes ++;
-        participantes = room.partcipantes;
-        return;     
-      }
-    });  
-  }console.log( participantes);
-  if(participantes == 0){
-    let item = {id_room: id_room, partcipantes: 1 }
-    roomAbiertas.push(item);
-    participantes++
-  }    
-  return participantes
-}
 
 //coneccion a la base de datos
 mensajero.connect(function(error){
@@ -66,7 +37,25 @@ mensajero.connect(function(error){
 
 io.on('connection', (socket) => {
   //var addedUser = false;
-  var item = {};
+  socket.on('user connect', (data) => {
+    socket.join('user-'+data.id_user);
+    usuariosActivos.push(data.id_user)
+    
+    socket.emit('logNotificacion', {
+      numUsers: usuariosActivos.length
+    });
+
+    
+    io.in('user-'+data.id_user).clients((error, clients) => {
+      if (error) throw error
+      console.log(clients) // => [Anw2LatarvGVVXEIAAAD]
+      console.log(clients.length)
+    });
+
+
+
+
+
   // when the client emits 'new message', this listens and executes
   /*socket.on('user connenct', (data) => {
     socket.join('user-'+data.id_user);
@@ -104,7 +93,7 @@ io.on('connection', (socket) => {
   //});
 
 
-
+/*
   socket.on('new message', (data) => {
     // we tell the client to execute 'new message'
     socket.to(data.id_room).emit('new message', {//socket.broadcast.emit('new message', {//
@@ -117,21 +106,15 @@ io.on('connection', (socket) => {
     var values = [
       [data.message, 'A',data.id_room,data.user]
     ];
-    mensajero.query(sql, [values], function (err, result) {
-      if (err){
-        console.log(err)
-        throw err;
-      } 
-      //console.log("Number of records inserted: " + result.affectedRows);
-    });
+          mensajero.query(sql, [values], function (err, result) {
+            if (err){
+              console.log(err)
+              throw err;
+            } 
+            //console.log("Number of records inserted: " + result.affectedRows);
+          });
     /*var query = mensajero.query('INSERT INTO personaje(nombre, apellido, biografia) VALUES(?, ?, ?)', ['Homero', 'Simpson', 'Esposo de Marge y padre de Bart, Lisa y Maggie.'], function(error, result){
-      if(error){
-         throw error;
-      }
-    });
-    */
-  });
-
+  *
   // when the client emits 'add user', this listens and executes
   socket.on('add user', (data) => {
     socket.join(data.id_user);
@@ -158,7 +141,7 @@ io.on('connection', (socket) => {
       username: socket.username,
       id_origen: data.id_origen,
       id_room:  data.id_room,
-      numUsers: participantes
+      numUsers: usuariosActivos.length
     });
   });
 
@@ -177,15 +160,15 @@ io.on('connection', (socket) => {
   });
 
   // when the user disconnects.. perform this
- /* socket.on('disconnect', () => {
-    if (addedUser) {
+  socket.on('disconnect', () => {
+    //if (addedUser) {
       --numUsers;
 
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
         username: socket.username,
-        numUsers: numUsers
+        numUsers: usuariosActivos.length
       });
-    }
-  });*/
+    //}
+  });
 });
