@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', (data) => {
-    socket.join(data.id_user);
+    socket.join(data.id_room);
     let participantes = addRoom(data.id_room)
     
       // when the client emits 'typing', we broadcast it to others
