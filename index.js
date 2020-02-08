@@ -14,7 +14,7 @@ const mensajero = mysql.createConnection({
   database: 'simulador'
 });
 const options = {
-  key: fs.readFileSync('key.pem'),
+  key:  fs.readFileSync('key.pem'),
   cert: fs.readFileSync('cert.pem')
 };
 
@@ -37,12 +37,15 @@ mensajero.connect(function(error){
   });
   
 io.on('connection', (socket) => {
-    var item = {};
+    var item = {},
+        _id_doom = "",
+        _user = "",
+        _username = "";
+
 
     socket.on('new message', (data) => {
       // we tell the client to execute 'new message'
-      //socket.join(data.id_room);
-      socket.to(data.id_room).emit('new message', {//socket.broadcast.emit('new message', {//
+      socket.to('chat-'+data.id_room).emit('new message', {//socket.broadcast.emit('new message', {//
         username: data.username,
         message:  data.message, 
         id_room:  data.id_room, 
@@ -54,7 +57,7 @@ io.on('connection', (socket) => {
       ];
       mensajero.query(sql, [values], function (err, result) {
         if (err){
-          console.log(err)
+          console.log(err);
           throw err;
         } 
         //console.log("Number of records inserted: " + result.affectedRows);
@@ -64,21 +67,49 @@ io.on('connection', (socket) => {
   
     // when the client emits 'add user', this listens and executes
     socket.on('add user', (data) => {
-      socket.join(data.id_room);
-      let participantes = 0//addRoom(data.id_room)
-     io.in(data.id_room).clients((error, clients) => {
-      if (error) throw error
-      participantes = clients.length
-      //console.log(clients) // => [Anw2LatarvGVVXEIAAAD]
-      //console.log(clients.length)
-    });
-      
-      socket.in(data.id_room).emit('user joined', {
-        username: socket.username,
-        id_origen: data.id_origen,
-        id_room:  data.id_room,
-        numUsers: participantes
+      socket.join('chat-'+data.id_room, () => {
+        _id_doom  = data.id_room;
+        _user     = data.id_origen;
+        _username = data.username;
       });
+
+      let id_room = data.id_room;
+      let participantes = 0//addRoom(data.id_room)
+     
+      io.in('chat-'+data.id_room).clients((error, clients) => {
+        if (error) throw error
+        participantes = clients.length
+        if(clients.length > 0){
+          var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
+              sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
+              sql += "    users.name AS 'username',"; 
+              sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
+              sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
+              sql += " FROM comunicacionDtRoomMensajes "; 
+              sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
+              sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
+              sql += " ) sub ORDER BY DATE ASC;"
+          mensajero.query(sql, [id_room], function (err, result) {
+            if (err){
+              throw err;
+            } 
+            socket.emit('login', {
+              username: data.username,
+              id_origen: data.id_origen,
+              id_room:  id_room,
+              resultados: result
+            });
+          });
+          if(clients.length > 1){
+            io.to(id_room).emit('user joined', {
+              username: data.username,
+              id_origen: data.id_origen,
+              id_room:  id_room
+            });
+          }
+        }
+      });
+  
     });
   
     // when the client emits 'typing', we broadcast it to others
@@ -92,6 +123,15 @@ io.on('connection', (socket) => {
     socket.on('stop typing', (data) => {
       socket.to(data.grupos).emit('stop typing', {
         username: socket.username
+      });
+    });
+
+
+    socket.on('disconnect', (reason) => {  
+      socket.to(_id_doom).emit('user left', {
+        username: _username,
+        id_origen:_user,
+        id_room:  _id_doom
       });
     });
   
