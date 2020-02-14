@@ -5,14 +5,20 @@ const express = require('express');
 const app = express();
 //inicializa el servoidor
 //settieng
+
+//host: 'mrbisne.com',
+//database: 'simula20'
 app.set('port', process.env.PORT || 3000);
 const mensajero = mysql.createConnection({
-  host: '74.208.166.96',
+
   user: 'asys',
   password: '1nt3gr4*2019',
   port: 5543,
   database: 'simulador'
 });
+
+//  key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
+//  cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')
 const options = {
   key:  fs.readFileSync('key.pem'),
   cert: fs.readFileSync('cert.pem')
@@ -35,7 +41,7 @@ mensajero.connect(function(error){
        console.log('Conexion correcta.');
     }
   });
-  
+
 io.on('connection', (socket) => {
     var item = {},
         _id_doom = "",
@@ -47,9 +53,9 @@ io.on('connection', (socket) => {
       // we tell the client to execute 'new message'
       socket.to('chat-'+data.id_room).emit('new message', {//socket.broadcast.emit('new message', {//
         username: data.username,
-        message:  data.message, 
-        id_room:  data.id_room, 
-        user:     data.user, 
+        message:  data.message,
+        id_room:  data.id_room,
+        user:     data.user,
       });console.log(data);
       var sql = "INSERT INTO comunicacionDtRoomMensajes (mensaje,state, id_comunicacionCtRoom, id_users_envio) VALUES ?";
       var values = [
@@ -59,12 +65,12 @@ io.on('connection', (socket) => {
         if (err){
           console.log(err);
           throw err;
-        } 
+        }
         //console.log("Number of records inserted: " + result.affectedRows);
       });
 
     });
-  
+
     // when the client emits 'add user', this listens and executes
     socket.on('add user', (data) => {
       socket.join('chat-'+data.id_room, () => {
@@ -75,24 +81,24 @@ io.on('connection', (socket) => {
 
       let id_room = data.id_room;
       let participantes = 0//addRoom(data.id_room)
-     
+
       io.in('chat-'+data.id_room).clients((error, clients) => {
         if (error) throw error
         participantes = clients.length
         if(clients.length > 0){
           var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
               sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
-              sql += "    users.name AS 'username',"; 
+              sql += "    users.name AS 'username',";
               sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
-              sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
-              sql += " FROM comunicacionDtRoomMensajes "; 
+              sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'"
+              sql += " FROM comunicacionDtRoomMensajes ";
               sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
-              sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
+              sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";
               sql += " ) sub ORDER BY DATE ASC;"
           mensajero.query(sql, [id_room], function (err, result) {
             if (err){
               throw err;
-            } 
+            }
             socket.emit('login', {
               username: data.username,
               id_origen: data.id_origen,
@@ -109,16 +115,16 @@ io.on('connection', (socket) => {
           }
         }
       });
-  
+
     });
-  
+
     // when the client emits 'typing', we broadcast it to others
     socket.on('typing', (data) => {
        socket.to(data.grupos).emit('typing', {
         username: socket.username
       });
     });
-  
+
     // when the client emits 'stop typing', we broadcast it to others
     socket.on('stop typing', (data) => {
       socket.to(data.grupos).emit('stop typing', {
@@ -127,13 +133,12 @@ io.on('connection', (socket) => {
     });
 
 
-    socket.on('disconnect', (reason) => {  
+    socket.on('disconnect', (reason) => {
       socket.to(_id_doom).emit('user left', {
         username: _username,
         id_origen:_user,
         id_room:  _id_doom
       });
     });
-  
+
   });
-  
