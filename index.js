@@ -69,46 +69,48 @@ io.on('connection', (socket) => {
         _id_doom  = data.id_room;
         _user     = data.id_origen;
         _username = data.username;
-      });
-
+  
       let id_room = data.id_room;
       let participantes = 0//addRoom(data.id_room)
      
-      io.in('chat-'+data.id_room).clients((error, clients) => {
-        if (error) throw error
-        participantes = clients.length
-        if(clients.length > 0){
-          var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
-              sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
-              sql += "    users.name AS 'username',"; 
-              sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
-              sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
-              sql += " FROM comunicacionDtRoomMensajes "; 
-              sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
-              sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
-              sql += " ) sub ORDER BY DATE ASC;"
-          mensajero.query(sql, [id_room], function (err, result) {
-            if (err){
-              //throw err;
-              console.log(err)
-            } 
-            socket.emit('login', {
-              username: data.username,
-              id_origen: data.id_origen,
-              id_room:  id_room,
-              resultados: result
-            });
+          io.in('chat-'+data.id_room).clients((error, clients) => {
+            if (error)   
+              console.log(err);
+
+            participantes = clients.length
+            if(clients.length > 0){
+              var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
+                  sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
+                  sql += "    users.name AS 'username',"; 
+                  sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
+                  sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
+                  sql += " FROM comunicacionDtRoomMensajes "; 
+                  sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
+                  sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
+                  sql += " ) sub ORDER BY DATE ASC;"
+              mensajero.query(sql, [id_room], function (err, result) {
+                if (err){
+                 
+                  console.log(err)
+                } 
+                socket.emit('login', {
+                  username: data.username,
+                  id_origen: data.id_origen,
+                  id_room:  id_room,
+                  resultados: result
+                });
+              });
+              if(clients.length > 1){
+                io.to('chat-'+data.id_room).emit('user joined', {
+                  username: data.username,
+                  id_origen: data.id_origen,
+                  id_room:  id_room
+                });
+              }
+            }
           });
-          if(clients.length > 1){
-            io.to('chat-'+data.id_room).emit('user joined', {
-              username: data.username,
-              id_origen: data.id_origen,
-              id_room:  id_room
-            });
-          }
-        }
-      });
   
+       });
     });
   
     // when the client emits 'typing', we broadcast it to others

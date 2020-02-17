@@ -34,7 +34,6 @@ io.on('connection', (socket) => {
     _id_user = "",
     _username = "";
    
-
     function sendMensaje(datos,id_notifer){
       socket.join('user-'+datos.id_destino, () => {
         socket.to('user-'+datos.id_destino).emit('notifer notificaMessage', {
@@ -51,7 +50,7 @@ io.on('connection', (socket) => {
 
     function getAllNotificaiones(id){
       resultados = []
-      var sql =  " SELECT * FROM( SELECT comunicacionTrNotificacion.id AS 'id', "
+      var sql =  " SELECT * FROM( SELECT DISTINCT comunicacionTrNotificacion.id AS 'id', "
           sql += "    users.avatar AS 'avatar', ";
           sql += "    comunicacionTrNotificacion.id_origen AS 'id_origen', ";
           sql += "    users.name AS 'username',"; 
@@ -60,16 +59,16 @@ io.on('connection', (socket) => {
 
           sql += "    comunicacionTrNotificacion.created_at AS 'DATE',"
           sql += "    comunicacionTrNotificacion.visto      AS 'visto' "
-          sql += " FROM comunicacionTrNotificacion "; 
+          sql += " FROM comunicacionTrNotificacion ";
           sql += " INNER JOIN users ON users.id =  comunicacionTrNotificacion.id_origen ";
           sql += " WHERE comunicacionTrNotificacion.id_userLector = ?  Order By  comunicacionTrNotificacion.created_at DESC  LIMIT 10";   
           sql += " ) sub ORDER BY DATE DESC;"
       mensajero.query(sql, [id], function (err, result) {
         if (err){
-        console.log(id)
           console.log(err)
         } 
-        resultados = result
+        else
+          resultados = result
       
         socket.emit('notifer getAllNotificaion', {
           id_user:    id,
@@ -90,8 +89,6 @@ io.on('connection', (socket) => {
       getAllNotificaiones( _id_user);
     });
   });
-
-
 
   socket.on('notifer message', (data) => {
     let id_notifer = 0;
@@ -114,7 +111,6 @@ io.on('connection', (socket) => {
   socket.on('notifer confirmaMessage', (data) => {
     let datos = data, id_notifer = data.id_notifer;
     var sql = "UPDATE comunicacionTrNotificacion SET visto = '1' WHERE id = '"+data.id_notifer+"'";
-  
     if(id_notifer != '0'){
        mensajero.query(sql , function (err, result) {
         if (err){
