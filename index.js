@@ -69,47 +69,53 @@ io.on('connection', (socket) => {
         _id_doom  = data.id_room;
         _user     = data.id_origen;
         _username = data.username;
+        let resultados = [];
   
       let id_room = data.id_room;
       let participantes = 0//addRoom(data.id_room)
      
           io.in('chat-'+data.id_room).clients((error, clients) => {
-            if (error)   
+            if (error)  {
+              console.log('Error: connection cliente');
               console.log(err);
+            } else{
 
-            participantes = clients.length
-            if(clients.length > 0){
-              var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
-                  sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
-                  sql += "    users.name AS 'username',"; 
-                  sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
-                  sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
-                  sql += " FROM comunicacionDtRoomMensajes "; 
-                  sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
-                  sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
-                  sql += " ) sub ORDER BY DATE ASC;"
-              mensajero.query(sql, [id_room], function (err, result) {
-                if (err){
-                 
-                  console.log(err)
-                } 
-                socket.emit('login', {
-                  username: data.username,
-                  id_origen: data.id_origen,
-                  id_room:  id_room,
-                  resultados: result
+              participantes = clients.length
+              resultados = []
+              if(clients.length > 0){
+                var sql =  " SELECT * FROM( SELECT comunicacionDtRoomMensajes.id_users_envio AS 'user', "
+                    sql += "    comunicacionDtRoomMensajes.id_comunicacionCtRoom AS 'id_room',";
+                    sql += "    users.name AS 'username',"; 
+                    sql += "    comunicacionDtRoomMensajes.mensaje AS 'message',";
+                    sql += "     DATE_FORMAT(comunicacionDtRoomMensajes.created_at,  '%H %i  %W %M %e %Y') AS 'fecha',"; 
+                    sql += "    comunicacionDtRoomMensajes.created_at AS 'DATE'" 
+                    sql += " FROM comunicacionDtRoomMensajes "; 
+                    sql += " INNER JOIN users ON users.id =  comunicacionDtRoomMensajes.id_users_envio ";
+                    sql += " WHERE comunicacionDtRoomMensajes.id_comunicacionCtRoom = ? AND comunicacionDtRoomMensajes.state = 'A' Order By comunicacionDtRoomMensajes.created_at DESC LIMIT 10 ";   
+                    sql += " ) sub ORDER BY DATE ASC;"
+                mensajero.query(sql, [id_room], function (err, result) {
+                  if (err){
+                    console.log(err)
+                  } else
+                    resultados = result;
+                  socket.emit('login', {
+                    username: data.username,
+                    id_origen: data.id_origen,
+                    id_room:  id_room,
+                    resultados: resultados
+                  });
                 });
-              });
-              if(clients.length > 1){
-                io.to('chat-'+data.id_room).emit('user joined', {
-                  username: data.username,
-                  id_origen: data.id_origen,
-                  id_room:  id_room
-                });
+                if(clients.length > 1){
+                  io.to('chat-'+data.id_room).emit('user joined', {
+                    username: data.username,
+                    id_origen: data.id_origen,
+                    id_room:  id_room
+                  });
+                }
               }
             }
+            
           });
-  
        });
     });
   
