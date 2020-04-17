@@ -1,5 +1,5 @@
-/*'use strict'
-
+'use strict'
+/*
 var fs = require('fs'),
     puerto = 3000,
     https = require('https');
@@ -33,7 +33,9 @@ const mysql = require('mysql'),
         user: 'asys',
         password: '1nt3gr4*2019',
         port: 5543,
-        database: 'simulador'
+        database: 'simulador',
+        queueLimit: 0,
+        waitForConnection: true
       }),
       options = {
         key:  fs.readFileSync('key.pem'),
@@ -118,6 +120,7 @@ promise
                       sql += " ) sub ORDER BY DATE ASC;"
                     resolve.query(sql, [id_room], function (err, result) {
                     if (err){
+                      
                       console.log(err)
                     } else{
                    
@@ -129,28 +132,6 @@ promise
                       });
                     }
                   });
-
-                  exports.executeQuery=function(query,callback){
-                    pool.getConnection(function(err,connection){
-                        if (err) {
-                          connection.release();
-                          throw err;
-                        }   
-                        connection.query(sql, [id_room],function(err,rows){
-                            connection.release();
-                            if(!err) {
-                                callback(null, {rows: rows});
-                            }           
-                        });
-                        connection.on('error', function(err) {      
-                              throw err;
-                              return;     
-                        });
-                    });
-                }
-
-
-
 
                   if(clients.length > 1){
                     io.to('chat-'+data.id_room).emit('user joined', {
@@ -193,4 +174,6 @@ promise
     /**************************************** */
     /**************************************** */
   })
-  .catch( (err) => {} )
+  .catch( (err) => {
+    console.log('Db:')
+    console.log(err)} )

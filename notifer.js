@@ -11,7 +11,9 @@ const mysql = require('mysql'),
         user: 'asys',
         password: '1nt3gr4*2019',
         port: 5543,
-        database: 'simulador'
+        database: 'simulador',
+        queueLimit: 0,
+        waitForConnection: true
       }),
       options = {
         key:  fs.readFileSync('key.pem'),
@@ -119,6 +121,19 @@ promise
           sendMensaje(datos,id_notifer)  
       });
 
+      socket.on('notifer inicioChat', (data) => {
+        
+        socket.join('user-'+data.id_destino, () => {
+          socket.to('user-'+data.id_destino).emit('notifer notificaChat', {
+            id_room:      data.id_room,
+            nombreOrigen: data.nombreOrigen,
+            id_destino:   data.id_origen,
+            id_origen:    data.id_destino
+          });
+        }); 
+        
+      });
+      
       socket.on('notifer confirmaMessage', (data) => {
         let datos = data, id_notifer = data.id_notifer;
         var sql = "UPDATE comunicacionTrNotificacion SET visto = '1' WHERE id = '"+data.id_notifer+"'";
