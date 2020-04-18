@@ -38,8 +38,8 @@ const mysql = require('mysql'),
         waitForConnection: true
       }),
       options = {
-        key:  fs.readFileSync('key.pem'),
-        cert: fs.readFileSync('cert.pem')
+        key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
+        cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')
       };
 //inicializa el servoidor
 //settieng
