@@ -33,7 +33,7 @@ const mysql = require('mysql'),
         user: 'asys',
         password: '1nt3gr4*2019',
         port: 5543,
-        database: 'simulador',
+        database: 'simula20',
         queueLimit: 0,
         waitForConnection: true
       }),
@@ -80,8 +80,10 @@ promise
           [data.message, 'A',data.id_room,data.user]
         ];
         resolve.query(sql, [values], function (err, result) {
+        
           if (err){
             console.log(err);
+            console.log(sql);
           } 
         });
   

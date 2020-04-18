@@ -11,7 +11,7 @@ const mysql = require('mysql'),
         user: 'asys',
         password: '1nt3gr4*2019',
         port: 5543,
-        database: 'simulador',
+        database: 'simula20',
         queueLimit: 0,
         waitForConnection: true
       }),
@@ -126,7 +126,7 @@ promise
         socket.join('user-'+data.id_destino, () => {
           socket.to('user-'+data.id_destino).emit('notifer notificaChat', {
             id_room:      data.id_room,
-            nombreOrigen: data.nombreOrigen,
+            origenName:   data.origenName,
             id_destino:   data.id_origen,
             id_origen:    data.id_destino
           });
