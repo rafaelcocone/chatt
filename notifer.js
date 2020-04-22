@@ -61,8 +61,9 @@ promise
           }); 
         }
 
-        function getAllNotificaiones(id){
-          let resultados = [ ]
+        function  getAllNotificaiones(id){
+          let resultados = [ ],
+              total = 0;
           var sql =  " SELECT * FROM( SELECT DISTINCT comunicacionTrNotificacion.id AS 'id', "
               sql += "    users.avatar AS 'avatar', ";
               sql += "    comunicacionTrNotificacion.id_origen AS 'id_origen', ";
@@ -74,7 +75,8 @@ promise
               sql += "    comunicacionTrNotificacion.visto      AS 'visto' "
               sql += " FROM comunicacionTrNotificacion ";
               sql += " INNER JOIN users ON users.id =  comunicacionTrNotificacion.id_origen ";
-              sql += " WHERE comunicacionTrNotificacion.id_userLector = ?  Order By  comunicacionTrNotificacion.created_at DESC  LIMIT 10";   
+              sql += " WHERE comunicacionTrNotificacion.id_userLector = ?  AND  comunicacionTrNotificacion.visto = '0' "
+              sql += " Order By  comunicacionTrNotificacion.created_at DESC  LIMIT 10";   
               sql += " ) sub ORDER BY DATE DESC;"
           resolve.query(sql, [id], function (err, result) {
             if (err){
@@ -84,13 +86,13 @@ promise
               socket.emit('notifer getAllNotificaion', {
                 id_user:    id,
                 resultados: result
-              });
-            }
-              
+              })
+            }              
           });
+
         }
 
-      socket.on('notifer connenct', (data) => {
+      socket.on('notifer connenct', async (data) => {
         socket.join('user-'+data.id_user, () => {
           _id_user     = data.id_user
           _username    = data.username
@@ -135,15 +137,18 @@ promise
       });
       
       socket.on('notifer confirmaMessage', (data) => {
-        let datos = data, id_notifer = data.id_notifer;
-        var sql = "UPDATE comunicacionTrNotificacion SET visto = '1' WHERE id = '"+data.id_notifer+"'";
-        if(id_notifer != '0'){
-          resolve.query(sql , function (err, result) {
-            if (err){
-              console.log(err);
-            } 
-          });
-        }
+        let datos = data, id_notifer = data.id_userLector;
+        var sql = "UPDATE comunicacionTrNotificacion SET visto = '1' WHERE  id_userLector = ?" ;
+        var values = [
+          [data.id_userLector]
+        ];
+        
+        resolve.query(sql, [values], function (err, result) {
+          if (err){
+            console.log(err);
+          } 
+        });
+        
       });
 
       socket.on('notifer logConfirma', (data) => {
