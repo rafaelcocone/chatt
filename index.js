@@ -80,10 +80,8 @@ promise
           [data.message, 'A',data.id_room,data.user]
         ];
         resolve.query(sql, [values], function (err, result) {
-        
           if (err){
             console.log(err);
-            console.log(sql);
           } 
         });
   
