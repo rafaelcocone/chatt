@@ -35,6 +35,9 @@ var promise = new Promise(function (resolve, reject){
     });
 })
 
+
+
+
 promise
   .then( (resolve, reject) => {
     console.log('Conexion DB correcta.')
@@ -60,6 +63,8 @@ promise
             });
           }); 
         }
+      
+        /*************************************************************************/
 
         function  getAllNotificaiones(id){
           let resultados = [ ],
@@ -75,7 +80,7 @@ promise
               sql += "    comunicacionTrNotificacion.visto      AS 'visto' "
               sql += " FROM comunicacionTrNotificacion ";
               sql += " INNER JOIN users ON users.id =  comunicacionTrNotificacion.id_origen ";
-              sql += " WHERE comunicacionTrNotificacion.id_userLector = ?  AND  comunicacionTrNotificacion.visto = '0' "
+              sql += " WHERE comunicacionTrNotificacion.id_userLector = ?    "
               sql += " Order By  comunicacionTrNotificacion.created_at DESC  LIMIT 10";   
               sql += " ) sub ORDER BY DATE DESC;"
           resolve.query(sql, [id], function (err, result) {
@@ -92,6 +97,7 @@ promise
 
         }
 
+      //agreagar usuario que entro al sistema para resibir mensajes
       socket.on('notifer connenct', async (data) => {
         socket.join('user-'+data.id_user, () => {
           _id_user     = data.id_user
@@ -101,6 +107,7 @@ promise
             username: _username,
             id_user:   _id_user  //usuario que entra en session
           });
+          //obtener todas las notificaiones no vista
           getAllNotificaiones( _id_user);
         });
       });
@@ -123,6 +130,7 @@ promise
           sendMensaje(datos,id_notifer)  
       });
 
+      //reporta inicio de chat
       socket.on('notifer inicioChat', (data) => {
         
         socket.join('user-'+data.id_destino, () => {
@@ -135,7 +143,7 @@ promise
         }); 
         
       });
-      
+      //cambiar estaus a visto notificaciones
       socket.on('notifer confirmaMessage', (data) => {
         let datos = data, id_notifer = data.id_userLector;
         var sql = "UPDATE comunicacionTrNotificacion SET visto = '1' WHERE  id_userLector = ?" ;
@@ -151,8 +159,9 @@ promise
         
       });
 
-      socket.on('notifer logConfirma', (data) => {
-        io.to('user-'+data.id_user).emit('notifer getLogConfirma', {
+      //respuesta a usuario por entrada
+      socket.on('notifer respuestaNotificacionEntrada', (data) => {
+        io.to('user-'+data.id_user).emit('notifer respuestaNotificacionConfirmacion', {
           username: data.username,
           id_user:  data.id_user, 
           id_origen: data.id_origen
