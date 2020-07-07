@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Servidor de streaming</title>
+  </head>
+  <body>
+    <h1>Servidor de streaming</h1>
+    <p>Tranmicion de tiempo real</p>
+    <video id="video"></video>
+    <canvas id="canvas" width="1200" height="720"></canvas>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+    <script>
+      
+      (function (d,io,na,w){
+        'use strict'
+        var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
+        var io        = io($urlIO);
+        var //io          = io('http://localhost:3002//'),
+            startCamera = false,
+            mediaSource = new MediaSource(),
+            //video = d.createElement('video'),
+            video = d.querySelector('video'),
+         //   video = d.getElementById('video'),
+            canvas      = d.querySelector('#canvas'),
+            contexto    = canvas.getContext('2d'),
+            mediaStream = new MediaStream(),
+            audioContext = new AudioContext(),
+            constraints = { audio: true, video: { width: 1280, height: 720 } }
+          
+        na.getMedia =   (
+          na.getUserMedia ||
+          na.webkitGetMedia ||
+          na.mozGetUserMedia ||
+          na.msGetUserMedia  
+        )
+        console.log( na.mediaDevices);
+        na.mediaDevices.getUserMedia(constraints)
+          .then(function(mediaStream) {
+            video.srcObject = mediaStream
+            startCamera = true
+            video.onloadedmetadata = function(e) {
+              video.play();
+            };
+          })
+          .catch(function(err) { console.log(err.name + ": " + err.message); });
+
+          w.playVideo = (function(cb){
+            return  w.requestAnimationFrame ||
+                    w.webkitCancelAnimationFrame ||
+                    w.mozRequestAnimationFrame ||
+                    w.msRequestAnimationFrame ||
+                    function (cb){
+                      w.setTimeout(cb,1000/100)
+                    }
+          })()
+
+          function streamVideo(contexto,canvas, video){
+            var outputStream = canvas.toDataURL('image/webp',.2)
+            contexto.drawImage(video,0,0)
+            if(startCamera)
+              io.emit('streaming',outputStream )
+            playVideo(function(){
+              streamVideo(contexto, canvas, video)
+            })
+          }
+          w.addEventListener('load', function(){
+            video.autoplay = true
+            video.style.display = 'none'
+            streamVideo(contexto, canvas, video)
+          })
+
+      })(document,io,navigator, window)
+    </script>
+
+  </body>
+</html>

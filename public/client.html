@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Cliente de streaming</title>
+  </head>
+  <body>
+    <h1>Cliente de streaming</h1>
+    <img id='streaming'>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+
+    <script>
+      (function (d,io){
+        'use strict'
+        var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
+var socket        = io($urlIO);
+      //  var socket        = io('http://localhost:3002/')//cambiar por ruta
+      
+        socket.on('playstream', function(image){ 
+          d.querySelector('#streaming').src = image
+        })
+      })(document, io)
+    </script>
+
+  </body>
+</html>
