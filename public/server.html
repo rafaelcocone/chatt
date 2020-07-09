@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <title>Servidor de streaming</title>
+    <link rel="stylesheet" href="/style.css" media="screen" charset="utf-8" />
   </head>
   <body>
     <h1>Servidor de streaming</h1>
     <p>Tranmicion de tiempo real</p>
+    <button id="broadcast" class="play">Broadcast</button>
+
     <video id="video"></video>
     <canvas id="canvas" width="1200" height="720"></canvas>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -15,8 +18,75 @@
       
       (function (d,io,na,w){
         'use strict'
+
+        var peerConnection = window.RTCPeerConnection ||
+                     window.mozRTCPeerConnection ||
+                     window.webkitRTCPeerConnection ||
+                     window.msRTCPeerConnection;
+
+        var sessionDescription = window.RTCSessionDescription ||
+                                window.mozRTCSessionDescription ||
+                                window.webkitRTCSessionDescription ||
+                                window.msRTCSessionDescription;
+
+        navigator.getUserMedia  = navigator.getUserMedia ||
+                                navigator.webkitGetUserMedia ||
+                                navigator.mozGetUserMedia ||
+                                navigator.msGetUserMedia;
+
+        //var socket = io.connect('http://localhost:5000');
+
+        var pc = new peerConnection({ iceServers: [{ url: "stun:stun.services.mozilla.com",
+            username: 'myuser',
+            credential: 'mycreds'
+            }]
+        });
+
+        function error (err) {
+        console.warn(err);
+        }
+
+
         var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
-        var io        = io($urlIO);
+        var socket        = io($urlIO);
+
+        navigator.getUserMedia({ audio: true }, function (stream) {
+            pc.addStream(stream);
+        }, error);
+
+        function createOffer () {
+            pc.createOffer(function(offer) {
+                pc.setLocalDescription(new sessionDescription(offer), function () {
+                    socket.emit('make-offer', {
+                        offer: offer
+                    });
+                }, error);
+            }, error);
+        }
+
+        socket.on('answer-made', function (data) {
+            pc.setRemoteDescription(new sessionDescription(data.answer), function () {
+                if (!answersFrom[data.socket]) {
+                    createOffer(data.socket);
+                    answersFrom[data.socket] = true;
+                }
+            }, error);
+        });
+
+        var btn = document.getElementById('broadcast');
+        btn.addEventListener('click', function () {
+            if (btn.getAttribute('class') === 'stop') {
+                btn.setAttribute('class', 'play');
+                btn.innerHTML = 'Broadcast';
+            } else {
+                btn.setAttribute('class', 'stop');
+                btn.innerHTML = 'Broadcasting...';
+                createOffer();
+            }
+        });
+
+        /******************************************/
+
         var //io          = io('http://localhost:3002//'),
             startCamera = false,
             mediaSource = new MediaSource(),
@@ -60,7 +130,7 @@
             var outputStream = canvas.toDataURL('image/webp',.2)
             contexto.drawImage(video,0,0)
             if(startCamera)
-              io.emit('streaming',outputStream )
+                socket.emit('streaming',outputStream )
             playVideo(function(){
               streamVideo(contexto, canvas, video)
             })

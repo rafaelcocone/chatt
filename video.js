@@ -55,6 +55,24 @@ promise
           _user = "",
           _username = "";
 
+          socket.on('make-offer', function (data) {
+            console.log(data)
+            socket.broadcast.emit('offer-made', {
+                offer: data.offer,
+                socket: socket.id
+                
+            });
+        });
+    
+        socket.on('make-answer', function (data) {
+            console.log(data)
+            socket.to(data.to).emit('answer-made', {
+                socket: socket.id,
+                answer: data.answer
+            });
+        });
+
+
         socket.on('streaming', (image) => {
             io.emit('playstream', image)
             
@@ -62,13 +80,7 @@ promise
   
 
   
-      socket.on('disconnect', (reason) => {  
-        socket.to('chat-'+_id_doom).emit('user left', {
-          username: _username,
-          id_origen:_user,
-          id_room:  _id_doom
-        });
-      });
+
     
     });
     
