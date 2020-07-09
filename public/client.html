@@ -31,7 +31,8 @@
                                 navigator.mozGetUserMedia ||
                                 navigator.msGetUserMedia;
 
-        //var socket = io.connect('http://localhost:5000');
+        var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
+        var socket        = io($urlIO);
 
         var pc = new peerConnection({ iceServers: [{ url: "stun:stun.services.mozilla.com",
             username: 'myuser',
@@ -44,8 +45,7 @@
         }
 
 
-        var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
-        var socket        = io($urlIO);
+
         /*******************************************************/
         var offerData,
         player = new Audio(),
@@ -90,9 +90,6 @@
             btn.innerHTML = 'Listen';
             offerData = data;
         });
-
-
-
 
 
 
