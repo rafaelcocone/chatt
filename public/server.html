@@ -36,9 +36,9 @@
 
         //var socket = io.connect('http://localhost:5000');
 
-        var pc = new peerConnection({ iceServers: [{ url: "stun:stun.services.mozilla.com",
-            username: 'myuser',
-            credential: 'mycreds'
+        var pc = new peerConnection({ iceServers: [{ url: "turn:mrbisne.com",
+            username: 'mrtest',
+            credential: 'mrpass'
             }]
         });
 
@@ -105,7 +105,7 @@
           na.mozGetUserMedia ||
           na.msGetUserMedia  
         )
-        console.log( na.mediaDevices);
+       // console.log( na.mediaDevices);
         na.mediaDevices.getUserMedia(constraints)
           .then(function(mediaStream) {
             video.srcObject = mediaStream
@@ -113,6 +113,8 @@
             video.onloadedmetadata = function(e) {
               video.play();
             };
+           
+            
           })
           .catch(function(err) { console.log(err.name + ": " + err.message); });
 

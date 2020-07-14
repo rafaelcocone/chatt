@@ -56,7 +56,7 @@ promise
           _username = "";
 
           socket.on('make-offer', function (data) {
-            console.log(data)
+          
             socket.broadcast.emit('offer-made', {
                 offer: data.offer,
                 socket: socket.id
@@ -65,7 +65,7 @@ promise
         });
     
         socket.on('make-answer', function (data) {
-            console.log(data)
+           
             socket.to(data.to).emit('answer-made', {
                 socket: socket.id,
                 answer: data.answer
