@@ -34,9 +34,9 @@
         var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
         var socket        = io($urlIO);
 
-        var pc = new peerConnection({ iceServers: [{ url: "stun:stun.services.mozilla.com",
-            username: 'myuser',
-            credential: 'mycreds'
+        var pc = new peerConnection({ iceServers: [{ url: "turn:mrbisne.com",
+            username: 'mrtest',
+            credential: 'mrpass'
             }]
         });
 
