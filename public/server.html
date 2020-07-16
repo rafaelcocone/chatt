@@ -97,7 +97,11 @@
             contexto    = canvas.getContext('2d'),
             mediaStream = new MediaStream(),
             audioContext = new AudioContext(),
-            constraints = { audio: true, video: { width: 1280, height: 720 } }
+            constraints = { audio: true, video: {
+                                  width: { min: 480, ideal: 720, max: 1024 },
+                                  height: { min: 360, ideal: 560, max: 720 },
+                                  frameRate: { ideal: 10, max: 15 } 
+                                } }
           
         na.getMedia =   (
           na.getUserMedia ||
