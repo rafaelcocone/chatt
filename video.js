@@ -21,6 +21,7 @@ const mysql = require('mysql'),
         key:  fs.readFileSync('key.pem'),
         cert: fs.readFileSync('cert.pem')
       };
+var sockets = [];
 //inicializa el servoidor
 //settieng
 app.set('port', process.env.PORT || puerto);
@@ -55,22 +56,34 @@ promise
           _user = "",
           _username = "";
 
-          socket.on('make-offer', function (data) {
-          
-            socket.broadcast.emit('offer-made', {
+       socket.emit('add-users', {
+            users: sockets
+        });
+
+        socket.broadcast.emit('add-users', {
+            users: [socket.id]
+        });
+
+        socket.on('make-offer', function (data) {
+            socket.to(data.to).emit('offer-made', {
                 offer: data.offer,
                 socket: socket.id
-                
             });
         });
-    
+
         socket.on('make-answer', function (data) {
-           
             socket.to(data.to).emit('answer-made', {
                 socket: socket.id,
                 answer: data.answer
             });
         });
+
+        socket.on('disconnect', function () {
+            sockets.splice(sockets.indexOf(socket.id), 1);
+            io.emit('remove-user', socket.id);
+        });
+
+        sockets.push(socket.id);
 
 
         socket.on('streaming', (image) => {
