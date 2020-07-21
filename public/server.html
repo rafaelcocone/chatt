@@ -10,8 +10,81 @@
     <p>Tranmicion de tiempo real</p>
     <button id="broadcast" class="play">Broadcast</button>
 
-    <video id="video"></video>
-    <canvas id="canvas" width="1200" height="720"></canvas>
+    <div class="container">
+      <video class="video-large" autoplay></video>
+      <div class="users-container" id="users-container">
+          <h4>Users</h4>
+          <div id="users"></div>
+      </div>
+    </div>
+    <style>
+
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        video {
+            background: #CCC;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        .video-large {
+            width: 75%;
+            float: left;
+        }
+
+        .users-container {
+            width: 21%;
+            float: left;
+            padding: 2%;
+            position: relative;
+        }
+
+        .video-small {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        #users div {
+            color: red;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        #users .active {
+            color: #000;
+            cursor: default;
+        }
+
+
+        button {
+            font-size: 2em;
+            border: 0px;
+            color: #FFF;
+        }
+
+        button.play {
+            background: green;
+        }
+
+        button.stop {
+            background: red;
+        }
+
+        button.muted {
+            background: #CCC;
+        }
+
+
+
+    </style>
+
+
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
     <script>
@@ -46,9 +119,13 @@
         console.warn(err);
         }
 
-        var answersFrom = {};
+        var answersFrom = {}, offer;
         var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3002' : 'https://mrbisne.com:3002' ;
         var socket        = io($urlIO);
+
+
+
+        /*
 
         navigator.getUserMedia({ audio: true }, function (stream) {
             pc.addStream(stream);
@@ -85,67 +162,83 @@
             }
         });
 
-        /******************************************/
+        ******************************************/
 
-        var //io          = io('http://localhost:3002//'),
-            startCamera = false,
-            mediaSource = new MediaSource(),
-            //video = d.createElement('video'),
-            video = d.querySelector('video'),
-         //   video = d.getElementById('video'),
-            canvas      = d.querySelector('#canvas'),
-            contexto    = canvas.getContext('2d'),
-            mediaStream = new MediaStream(),
-            audioContext = new AudioContext(),
-            constraints = { audio: true, video: {
-                                  width: { min: 480, ideal: 720, max: 1024 },
-                                  height: { min: 360, ideal: 560, max: 720 },
-                                  frameRate: { ideal: 10, max: 15 } 
-                                } }
-          
-        na.getMedia =   (
-          na.getUserMedia ||
-          na.webkitGetMedia ||
-          na.mozGetUserMedia ||
-          na.msGetUserMedia  
-        )
-       // console.log( na.mediaDevices);
-        na.mediaDevices.getUserMedia(constraints)
-          .then(function(mediaStream) {
-            video.srcObject = mediaStream
-            startCamera = true
-            video.onloadedmetadata = function(e) {
-              video.play();
-            };
-           
-            
-          })
-          .catch(function(err) { console.log(err.name + ": " + err.message); });
+        pc.onaddstream = function (obj) {
+          var vid = document.createElement('video');
+          vid.setAttribute('class', 'video-small');
+          vid.setAttribute('autoplay', 'autoplay');
+          vid.setAttribute('id', 'video-small');
+          document.getElementById('users-container').appendChild(vid);
+          //vid.src = window.URL.createObjectURL(obj.stream);
+          vid.srcObject = obj.stream;
+      }
 
-          w.playVideo = (function(cb){
-            return  w.requestAnimationFrame ||
-                    w.webkitCancelAnimationFrame ||
-                    w.mozRequestAnimationFrame ||
-                    w.msRequestAnimationFrame ||
-                    function (cb){
-                      w.setTimeout(cb,1000/100)
-                    }
-          })()
+      navigator.getUserMedia({video: true}, function (stream) {
+          var video = document.querySelector('video');
+          video.srcObject = stream;
+        // video.src = window.URL.createObjectURL(stream);
+          pc.addStream(stream);
+      }, error);
 
-          function streamVideo(contexto,canvas, video){
-            var outputStream = canvas.toDataURL('image/webp',.2)
-            contexto.drawImage(video,0,0)
-            if(startCamera)
-                socket.emit('streaming',outputStream )
-            playVideo(function(){
-              streamVideo(contexto, canvas, video)
-            })
+      function error (err) {
+          console.warn('Error', err);
+      }
+
+      function createOffer (id) {
+          pc.createOffer(function(offer) {
+              pc.setLocalDescription(new sessionDescription(offer), function () {
+                  socket.emit('make-offer', {
+                      offer: offer,
+                      to: id
+                  });
+              }, error);
+          }, error);
+      }
+
+      socket.on('answer-made', function (data) {
+          pc.setRemoteDescription(new sessionDescription(data.answer), function () {
+              document.getElementById(data.socket).setAttribute('class', 'active');
+              if (!answersFrom[data.socket]) {
+                  createOffer(data.socket);
+                  answersFrom[data.socket] = true;
+              }
+          }, error);
+      });
+
+      socket.on('offer-made', function (data) {
+          offer = data.offer;
+
+          pc.setRemoteDescription(new sessionDescription(data.offer), function () {
+              pc.createAnswer(function (answer) {
+                pc.setLocalDescription(new sessionDescription(answer), function () {
+                    socket.emit('make-answer', {
+                        answer: answer,
+                        to: data.socket
+                    });
+                }, error);
+              }, error);
+          }, error);
+      });
+
+      socket.on('add-users', function (data) {
+          for (var i = 0; i < data.users.length; i++) {
+              var el = document.createElement('div'),
+                  id = data.users[i];
+
+              el.setAttribute('id', id);
+              el.innerHTML = id;
+              el.addEventListener('click', function () {
+                  createOffer(id);
+              });
+              document.getElementById('users').appendChild(el);
           }
-          w.addEventListener('load', function(){
-            video.autoplay = true
-            video.style.display = 'none'
-            streamVideo(contexto, canvas, video)
-          })
+      });
+
+      socket.on('remove-user', function (id) {
+          var div = document.getElementById(id);
+          document.getElementById('users').removeChild(div);
+      });
 
       })(document,io,navigator, window)
     </script>
