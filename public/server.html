@@ -174,16 +174,13 @@
           vid.srcObject = obj.stream;
       }
 
-      navigator.getUserMedia({video: true}, function (stream) {
+      navigator.getUserMedia({video: true,  audio: true}, function (stream) {
           var video = document.querySelector('video');
           video.srcObject = stream;
         // video.src = window.URL.createObjectURL(stream);
           pc.addStream(stream);
       }, error);
 
-      function error (err) {
-          console.warn('Error', err);
-      }
 
       function createOffer (id) {
           pc.createOffer(function(offer) {
@@ -195,6 +192,7 @@
               }, error);
           }, error);
       }
+      
 
       socket.on('answer-made', function (data) {
           pc.setRemoteDescription(new sessionDescription(data.answer), function () {
