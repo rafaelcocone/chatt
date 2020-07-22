@@ -106,6 +106,12 @@
                                 navigator.webkitGetUserMedia ||
                                 navigator.mozGetUserMedia ||
                                 navigator.msGetUserMedia;
+        
+        var constraints = { audio: true, video: {
+                                  width: { min: 480, ideal: 720, max: 1024 },
+                                  height: { min: 360, ideal: 560, max: 720 },
+                                  frameRate: { ideal: 10, max: 15 } 
+                                } }
 
         //var socket = io.connect('http://localhost:5000');
 
@@ -174,7 +180,7 @@
           vid.srcObject = obj.stream;
       }
 
-      navigator.getUserMedia({video: true,  audio: true}, function (stream) {
+      navigator.getUserMedia(constraints, function (stream) {
           var video = document.querySelector('video');
           video.srcObject = stream;
         // video.src = window.URL.createObjectURL(stream);
@@ -204,6 +210,14 @@
           }, error);
       });
 
+      socket.on('answer-made', function (data) {
+            pc.setRemoteDescription(new sessionDescription(data.answer), function () {
+                if (!answersFrom[data.socket]) {
+                    createOffer(data.socket);
+                    answersFrom[data.socket] = true;
+                }
+            }, error);
+        });
       socket.on('offer-made', function (data) {
           offer = data.offer;
 
@@ -237,6 +251,69 @@
           var div = document.getElementById(id);
           document.getElementById('users').removeChild(div);
       });
+
+/**
+        var //io          = io('http://localhost:3002//'),
+            startCamera = false,
+            mediaSource = new MediaSource(),
+            //video = d.createElement('video'),
+            video = d.querySelector('video'),
+         //   video = d.getElementById('video'),
+            canvas      = d.querySelector('#canvas'),
+            contexto    = canvas.getContext('2d'),
+            mediaStream = new MediaStream(),
+            audioContext = new AudioContext(),
+            constraints = { audio: true, video: {
+                                  width: { min: 480, ideal: 720, max: 1024 },
+                                  height: { min: 360, ideal: 560, max: 720 },
+                                  frameRate: { ideal: 10, max: 15 } 
+                                } }
+          
+        na.getMedia =   (
+          na.getUserMedia ||
+          na.webkitGetMedia ||
+          na.mozGetUserMedia ||
+          na.msGetUserMedia  
+        )
+       // console.log( na.mediaDevices);
+        na.mediaDevices.getUserMedia(constraints)
+          .then(function(mediaStream) {
+            video.srcObject = mediaStream
+            startCamera = true
+            video.onloadedmetadata = function(e) {
+              video.play();
+            };
+           
+            
+          })
+          .catch(function(err) { console.log(err.name + ": " + err.message); });
+
+          w.playVideo = (function(cb){
+            return  w.requestAnimationFrame ||
+                    w.webkitCancelAnimationFrame ||
+                    w.mozRequestAnimationFrame ||
+                    w.msRequestAnimationFrame ||
+                    function (cb){
+                      w.setTimeout(cb,1000/100)
+                    }
+          })()
+
+          function streamVideo(contexto,canvas, video){
+            var outputStream = canvas.toDataURL('image/webp',.2)
+            contexto.drawImage(video,0,0)
+            if(startCamera)
+                socket.emit('streaming',outputStream )
+            playVideo(function(){
+              streamVideo(contexto, canvas, video)
+            })
+          }
+          w.addEventListener('load', function(){
+            video.autoplay = true
+            video.style.display = 'none'
+            streamVideo(contexto, canvas, video)
+          })
+
+*/
 
       })(document,io,navigator, window)
     </script>
