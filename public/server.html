@@ -6,15 +6,12 @@
     <link rel="stylesheet" href="/style.css" media="screen" charset="utf-8" />
   </head>
   <body>
-    <h1>Servidor de streaming</h1>
-    <p>Tranmicion de tiempo real</p>
-    <button id="broadcast" class="play">Broadcast</button>
 
     <div class="container">
       <video class="video-large" autoplay></video>
       <div class="users-container" id="users-container">
           <h4>Users</h4>
-          <div id="users"></div>
+          <div class="videousers"></div>
       </div>
     </div>
     <style>
@@ -33,12 +30,12 @@
         }
 
         .video-large {
-            width: 75%;
+            width: 200px;
             float: left;
         }
 
         .users-container {
-            width: 21%;
+            
             float: left;
             padding: 2%;
             position: relative;
@@ -46,7 +43,7 @@
 
         .video-small {
             margin-top: 20px;
-            width: 100%;
+            width: 400px;
         }
 
         #users div {
@@ -210,14 +207,7 @@
           }, error);
       });
 
-      socket.on('answer-made', function (data) {
-            pc.setRemoteDescription(new sessionDescription(data.answer), function () {
-                if (!answersFrom[data.socket]) {
-                    createOffer(data.socket);
-                    answersFrom[data.socket] = true;
-                }
-            }, error);
-        });
+   
       socket.on('offer-made', function (data) {
           offer = data.offer;
 
