@@ -8,12 +8,16 @@
   <body>
 
     <div class="container">
-      <video class="video-large" autoplay></video>
+      <div class="divideo-large">
+        <video class="video-large" autoplay></video>
+      </div>  
       <div class="users-container" id="users-container">
           <h4>Users</h4>
           <div class="videousers"></div>
       </div>
     </div>
+
+
     <style>
 
         html, body {
@@ -30,21 +34,22 @@
         }
 
         .video-large {
-            width: 200px;
-            float: left;
+            width: 75%;
+    float: left;
         }
 
-        .users-container {
-            
-            float: left;
-            padding: 2%;
-            position: relative;
-        }
+      
+.users-container {
+    width: 21%;
+    float: left;
+    padding: 2%;
+    position: relative;
+}
 
-        .video-small {
-            margin-top: 20px;
-            width: 400px;
-        }
+.video-small {
+    margin-top: 20px;
+    width: 100%;
+}
 
         #users div {
             color: red;
@@ -186,6 +191,19 @@
 
 
       function createOffer (id) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName;
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        var tech = getUrlParameter('technology');
+
+
+
           pc.createOffer(function(offer) {
               pc.setLocalDescription(new sessionDescription(offer), function () {
                   socket.emit('make-offer', {
