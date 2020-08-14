@@ -1,19 +1,21 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title></title>
-        <link rel="stylesheet" href="/style.css" media="screen" charset="utf-8" />
-    </head>
-    <body>
-        <div class="container">
-            <video class="video-large" autoplay></video>
-            <div class="users-container" id="users-container">
-                <h4>Users</h4>
-                <div id="users"></div>
-            </div>
-        <div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Servidor de streaming</title>
+    <link rel="stylesheet" href="/style.css" media="screen" charset="utf-8" />
+  </head>
+  <body>
 
+    <div class="container">
+      <div class="divideo-large">
+        <video class="video-large" autoplay></video>
+      </div>  
+      <div class="users-container" id="users-container">
+          <h4>Users</h4>
+          <div class="videousers"></div>
+      </div>
+    </div>
 
 
     <style>
@@ -32,22 +34,21 @@
         }
 
         .video-large {
-            width: 75%;
-    float: left;
+            width: 200px;
+            float: left;
         }
 
-      
-.users-container {
-    width: 21%;
-    float: left;
-    padding: 2%;
-    position: relative;
-}
+        .users-container {
+            
+            float: left;
+            padding: 2%;
+            position: relative;
+        }
 
-.video-small {
-    margin-top: 20px;
-    width: 100%;
-}
+        .video-small {
+            margin-top: 20px;
+            width: 400px;
+        }
 
         #users div {
             color: red;
@@ -189,7 +190,17 @@
 
 
       function createOffer (id) {
-  
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName;
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        var tech = getUrlParameter('technology');
+
           pc.createOffer(function(offer) {
               pc.setLocalDescription(new sessionDescription(offer), function () {
                   socket.emit('make-offer', {
@@ -237,13 +248,13 @@
               el.addEventListener('click', function () {
                   createOffer(id);
               });
-              document.getElementById('users').appendChild(el);
+              document.getElementById('videousers').appendChild(el);
           }
       });
 
       socket.on('remove-user', function (id) {
           var div = document.getElementById(id);
-          document.getElementById('users').removeChild(div);
+          document.getElementById('videousers').removeChild(div);
       });
 
 /**
