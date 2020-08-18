@@ -1,6 +1,5 @@
 'use strict'
 
-
 var fs = require('fs'),
     puerto = 3003,
     publicDir   = `${__dirname}/public`,
@@ -51,3 +50,25 @@ var promise = new Promise(function (resolve, reject){
     });
 })
 
+
+promise
+  .then( (resolve, reject) => {
+    console.log('Conexion DB correcta.')
+    /*************************************** */
+    io.on('connection', socket => {
+        socket.on('join-room', (roomId, userId) => {
+          socket.join(roomId)
+          socket.to(roomId).broadcast.emit('user-connected', userId)
+      
+          socket.on('disconnect', () => {
+            socket.to(roomId).broadcast.emit('user-disconnected', userId)
+          })
+        })
+      })
+    
+    /**************************************** */
+    /**************************************** */
+  })
+  .catch( (err) => {
+    console.log('Db:')
+    console.log(err)} )

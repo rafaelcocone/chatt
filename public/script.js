@@ -1,8 +1,9 @@
-const socket = io('/')
+var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003' : 'https://mrbisne.com:3003' ;
+const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer(undefined, {
   host: '/',
-  port: '3001'
+  port: '3005'
 })
 const myVideo = document.createElement('video')
 myVideo.muted = true
