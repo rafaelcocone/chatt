@@ -2,10 +2,14 @@ var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003'
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 
+peer = new Peer({host:'peerjs-server.herokuapp.com', secure:true, port:443})
 //inicialiaza peer
 const myPeer = new Peer(undefined, {
-  host: '/',
-  port: '3005'
+ // host: '/',
+host: 'https://www.mrbisne.com/',
+ //host:'peerjs-server.herokuapp.com', 
+ secure:true, 
+ port: '3005'
 })
 const myVideo = document.createElement('video')
 myVideo.muted = true
