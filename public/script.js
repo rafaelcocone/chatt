@@ -7,7 +7,11 @@ let $sendMensage = $('#chat_message')
 const myPeer = new Peer(undefined, {
   host: 'www.mrbisne.com/',
  secure:true, 
- port: '3005'
+ port: '3005',
+ debug: 3,
+ config: {'iceServers':[
+                {'url': 'turn:mrbisne.com', username: 'mrtest', credential: 'mrpass' },
+         ]}
 })
 
 const myVideo = document.createElement('video')
