@@ -25,6 +25,7 @@ navigator.mediaDevices.getUserMedia({
    audio: true
  }).then(stream => {
    //inicar protocolo de camara y audio
+   myVideoStream = stream
    addVideoStream(myVideo, stream)
 
     //recibir reespuesta de otros usuarios
