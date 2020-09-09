@@ -5,7 +5,7 @@ let $sendMensage = $('#chat_message')
 
 //inicialiaza peer
 const myPeer = new Peer(undefined, {
-  host: 'www.mrbisne.com/',
+  host: 'www.mrbisne.com',
  secure:true, 
  port: '3005',
  debug: 3,
