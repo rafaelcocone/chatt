@@ -64,7 +64,11 @@ navigator.mediaDevices.getUserMedia({
 //envio de desconeccion
  socket.on('user-disconnected', userId => {
     //desconectar usuario si existe en lista
-   if (peers[userId]) peers[userId].close()
+   if (peers[userId]){
+      console.log('usuario restantes')
+      console.log(peers)
+      peers[userId].close()
+   } 
  })
 
 
@@ -90,6 +94,8 @@ function connectToNewUser(userId, stream) {
   })
     //aggregar usuario a comunication
     peers[userId] = call
+    console.log('usuario en room')
+    console.log(peers)
 }
 
  //agregar video stream y darle play 

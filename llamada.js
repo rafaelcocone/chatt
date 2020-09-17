@@ -61,7 +61,14 @@ promise
           console.log('coneccion a room '+ roomId, userId);
           socket.join(roomId)
           socket.to(roomId).broadcast.emit('user-connected', userId)
-        
+         
+          io.clients((error, clients) => {
+            if (error) throw error;
+            console.log('clientes en grupo:');
+            console.log(clients); 
+          });
+
+
           socket.on('message', (message) => {
             //send message to the same room
             io.to(roomId).emit('createMessage', message)
@@ -70,6 +77,11 @@ promise
           socket.on('disconnect', () => {
             console.log('desconeccion: '+userId)
             socket.to(roomId).broadcast.emit('user-disconnected', userId)
+            io.clients((error, clients) => {
+              if (error) throw error;
+              console.log('clientes restantes:');
+              console.log(clients); 
+            });
           })
       })
     })
