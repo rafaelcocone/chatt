@@ -18,8 +18,8 @@ const mysql = require('mysql'),
         waitForConnection: true
       }),
       options = {
-        key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
-        cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')
+        key:  fs.readFileSync('key.pem'),
+        cert: fs.readFileSync('cert.pem')
       };
 var sockets = [];
 
@@ -62,12 +62,19 @@ promise
           socket.join(roomId)
           socket.to(roomId).broadcast.emit('user-connected', userId)
          
-          io.clients((error, clients) => {
+          io.in(roomId).clients((error, clients) => {
             if (error) throw error;
-            console.log('clientes en grupo:');
+            console.log('grupo: '+ roomId + 'clientes en grupo:');
             console.log(clients); 
           });
 
+          socket.on('areyouhere', (id_room) => {
+            //send message to reconecte
+           
+            console.log('are you here?:');
+            console.log(userId);
+            socket.to(roomId).broadcast.emit('user-connected', userId)
+          });
 
           socket.on('message', (message) => {
             //send message to the same room

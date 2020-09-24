@@ -2,6 +2,20 @@ var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003'
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
+let id_room = undefined;
+
+const myVideo = document.createElement('video')
+myVideo.muted = true
+//usuario en sesion
+const peers = {}
+let myVideoStream 
+
+// Esta funcion se ejecuta antes de cerrar el navegador destruyendo la conexion del usuario en el servidor de PeerJS
+window.onunload = window.onbeforeunload = function(e) {
+  if (!!myPeer && !myPeer.destroyed) {
+    myPeer.destroy();
+  }
+};
 
 //inicialiaza peer
 const myPeer = new Peer(undefined, {
@@ -10,15 +24,11 @@ const myPeer = new Peer(undefined, {
  port: '3005',
  debug: 3,
  config: {'iceServers':[
-                {'url': 'turn:mrbisne.com', username: 'mrtest', credential: 'mrpass' },
+                {'url': 'turn:mrbisne.com', username: 'mrtest', credential: 'mrpass' }
          ]}
 })
 
-const myVideo = document.createElement('video')
-myVideo.muted = true
-//usuario en sesion
-const peers = {}
-let myVideoStream 
+
 
 navigator.mediaDevices.getUserMedia({
    video: true,
@@ -68,6 +78,7 @@ navigator.mediaDevices.getUserMedia({
       console.log('usuario restantes')
       console.log(peers)
       peers[userId].close()
+      socket.emit('areyouhere', userId );
    } 
  })
 
@@ -76,21 +87,98 @@ navigator.mediaDevices.getUserMedia({
 /*************************************************************/
 //conectar a room
 myPeer.on('open', id => {
+  $id_room = id
+  console.log('me: ')
+  console.log(id)
   //id es mi propio id de coneccion
    socket.emit('join-room', ROOM_ID, id)
 })
 
+/************************************************************** */
+// Este evento se ejecuta cuando ocurra un error al conectarse al servidor de PeerJS
+myPeer.on("error", function(err) {
+  let errorDet = 'descripcion de error=> '
+  switch (err.type) {
+    case "browser-incompatible":
+      console.log(
+        errorDet+"browser-incompatible: The client's browser does not support some or all WebRTC features that you are trying to use."
+      );
+      break;
+    case "disconnected":
+      console.log(
+        errorDet+"disconnected: You've already disconnected this peer from the server and can no longer make any new connections on it."
+      );
+      break;
+    case "invalid-id":
+      console.log(
+        errorDet+"invalid-id: The ID passed into the Peer constructor contains illegal characters."
+      );
+      break;
+    case "invalid-key":
+      console.log(
+        errorDet+"invalid-key: The API key passed into the Peer constructor contains illegal characters or is not in the system (cloud server only)."
+      );
+      break;
+    case "network":
+      console.log(
+        errorDet+"network: Lost or cannot establish a connection to the signalling server."
+      );
+      break;
+    case "peer-unavailable":
+      console.log(
+        errorDet+"peer-unavailable: The peer you're trying to connect to does not exist."
+      );
+      $(".text-header small").html("Desconectado");
+      break;
+    case "ssl-unavailable":
+      console.log(
+        errorDet+"ssl-unavailable: PeerJS is being used securely, but the cloud server does not support SSL. Use a custom PeerServer."
+      );
+      break;
+    case "server-error":
+      console.log(errorDet+"server-error: Unable to reach the server.");
+      break;
+    case "socket-error":
+      console.log(errorDet+"socket-error: An error from the underlying socket.");
+      break;
+    case "socket-closed":
+      console.log(
+        errorDet+"socket-closed: The underlying socket closed unexpectedly."
+      );
+      break;
+    case "unavailable-id":
+      console.log(
+        errorDet+"unavailable-id: The ID passed into the Peer constructor is already taken."
+      );
+      break;
+    case "webrtc":
+      console.log(errorDet+"webrtc: Native WebRTC errors.");
+      break;
+    default:
+      console.log(errorDet+"An unexpected error has ocurred");
+      break;
+  }
+});
+
+
+/*******************************************************************/ 
 //conectar a otros usuario
 function connectToNewUser(userId, stream) {
   const call = myPeer.call(userId, stream)
   const video = document.createElement('video')
   //iniciar stream
   call.on('stream', userVideoStream => {
+    
     addVideoStream(video, userVideoStream)
   })
   //cerrar coneccion
   call.on('close', () => {
+    console.log('desconectado:');
+    console.log(peers)
     video.remove()
+    
+    
+    //areyouhere
   })
     //aggregar usuario a comunication
     peers[userId] = call
