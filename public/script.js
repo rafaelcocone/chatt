@@ -2,6 +2,7 @@ var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003'
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
+let id_room = undefined;
 
 const myVideo = document.createElement('video')
 myVideo.muted = true
@@ -77,6 +78,7 @@ navigator.mediaDevices.getUserMedia({
       console.log('usuario restantes')
       console.log(peers)
       peers[userId].close()
+      socket.emit('areyouhere', userId );
    } 
  })
 
@@ -85,6 +87,7 @@ navigator.mediaDevices.getUserMedia({
 /*************************************************************/
 //conectar a room
 myPeer.on('open', id => {
+  $id_room = id
   console.log('me: ')
   console.log(id)
   //id es mi propio id de coneccion
@@ -170,9 +173,12 @@ function connectToNewUser(userId, stream) {
   })
   //cerrar coneccion
   call.on('close', () => {
-    console.log('desconectado: you');
+    console.log('desconectado:');
     console.log(peers)
     video.remove()
+    
+    
+    //areyouhere
   })
     //aggregar usuario a comunication
     peers[userId] = call
