@@ -2,7 +2,7 @@ var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003'
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
-let id_room = undefined;
+let $id_room = undefined;
 
 const myVideo = document.createElement('video')
 myVideo.muted = true
@@ -29,7 +29,6 @@ const myPeer = new Peer(undefined, {
 })
 
 
-
 navigator.mediaDevices.getUserMedia({
    video: true,
    audio: true
@@ -48,12 +47,12 @@ navigator.mediaDevices.getUserMedia({
     })
 
     //detectar coneccion de nuevo usuaio
-       socket.on('user-connected', (userId) => {
+    socket.on('user-connected', (userId) => {
         connectToNewUser(userId, stream)
     })
 
     //evento de enviar mesajes
-     $('#chat_message').keydown( (e)  => {
+    $('#chat_message').keydown( (e)  => {
       if(e.which == 13 && $sendMensage.val().length !== 0 ){
           socket.emit('message', $sendMensage.val());
           $sendMensage.val('');
@@ -78,7 +77,10 @@ navigator.mediaDevices.getUserMedia({
       console.log('usuario restantes')
       console.log(peers)
       peers[userId].close()
-      socket.emit('areyouhere', userId );
+      if( $id_room === userId){
+        socket.emit('areyouhere', userId );
+      }
+        
    } 
  })
 
@@ -176,8 +178,7 @@ function connectToNewUser(userId, stream) {
     console.log('desconectado:');
     console.log(peers)
     video.remove()
-    
-    
+        
     //areyouhere
   })
     //aggregar usuario a comunication
@@ -196,8 +197,6 @@ function addVideoStream(video, stream) {
  }
 
 
-
- 
 /************************************************************************* */
 //panel de control
 
