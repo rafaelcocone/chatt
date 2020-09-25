@@ -29,10 +29,20 @@ const myPeer = new Peer(undefined, {
 })
 
 
-navigator.mediaDevices.getUserMedia({
-   video: true,
-   audio: true
- }).then(stream => {
+navigator.getUserMedia  = navigator.getUserMedia ||
+                        navigator.webkitGetUserMedia ||
+                        navigator.mozGetUserMedia ||
+                        navigator.msGetUserMedia;
+
+var constraints = { audio: true, video: {
+                          width: { min: 240, ideal: 480, max: 720 },
+                          height: { min: 144, ideal: 240, max: 480 },
+                          frameRate: { ideal: 10, max: 15 } 
+                        } }
+
+navigator.mediaDevices.getUserMedia(
+  constraints
+ ).then(stream => {
    //inicar protocolo de camara y audio
    myVideoStream = stream
    addVideoStream(myVideo, stream)
@@ -77,9 +87,9 @@ navigator.mediaDevices.getUserMedia({
       console.log('usuario restantes')
       console.log(peers)
       peers[userId].close()
-      if( $id_room === userId){
+      /*if( $id_room === userId){
         socket.emit('areyouhere', userId );
-      }
+      }*/
         
    } 
  })
