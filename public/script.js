@@ -2,7 +2,7 @@ var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003'
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
-let id_room = undefined;
+let $id_room = undefined;
 
 const myVideo = document.createElement('video')
 myVideo.muted = true
@@ -29,11 +29,20 @@ const myPeer = new Peer(undefined, {
 })
 
 
+navigator.getUserMedia  = navigator.getUserMedia ||
+                        navigator.webkitGetUserMedia ||
+                        navigator.mozGetUserMedia ||
+                        navigator.msGetUserMedia;
 
-navigator.mediaDevices.getUserMedia({
-   video: true,
-   audio: true
- }).then(stream => {
+var constraints = { audio: true, video: {
+                          width: { min: 240, ideal: 480, max: 720 },
+                          height: { min: 144, ideal: 240, max: 480 },
+                          frameRate: { ideal: 10, max: 15 } 
+                        } }
+
+navigator.mediaDevices.getUserMedia(
+  constraints
+ ).then(stream => {
    //inicar protocolo de camara y audio
    myVideoStream = stream
    addVideoStream(myVideo, stream)
@@ -48,12 +57,12 @@ navigator.mediaDevices.getUserMedia({
     })
 
     //detectar coneccion de nuevo usuaio
-       socket.on('user-connected', (userId) => {
+    socket.on('user-connected', (userId) => {
         connectToNewUser(userId, stream)
     })
 
     //evento de enviar mesajes
-     $('#chat_message').keydown( (e)  => {
+    $('#chat_message').keydown( (e)  => {
       if(e.which == 13 && $sendMensage.val().length !== 0 ){
           socket.emit('message', $sendMensage.val());
           $sendMensage.val('');
@@ -78,7 +87,10 @@ navigator.mediaDevices.getUserMedia({
       console.log('usuario restantes')
       console.log(peers)
       peers[userId].close()
-      socket.emit('areyouhere', userId );
+      /*if( $id_room === userId){
+        socket.emit('areyouhere', userId );
+      }*/
+        
    } 
  })
 
@@ -176,8 +188,7 @@ function connectToNewUser(userId, stream) {
     console.log('desconectado:');
     console.log(peers)
     video.remove()
-    
-    
+        
     //areyouhere
   })
     //aggregar usuario a comunication
@@ -196,8 +207,6 @@ function addVideoStream(video, stream) {
  }
 
 
-
- 
 /************************************************************************* */
 //panel de control
 
