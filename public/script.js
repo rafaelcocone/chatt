@@ -28,6 +28,16 @@ const myPeer = new Peer(undefined, {
          ]}
 })
 
+var peerConnection = window.RTCPeerConnection ||
+  window.mozRTCPeerConnection ||
+  window.webkitRTCPeerConnection ||
+  window.msRTCPeerConnection;
+
+var sessionDescription = window.RTCSessionDescription ||
+           window.mozRTCSessionDescription ||
+           window.webkitRTCSessionDescription ||
+           window.msRTCSessionDescription;
+
 
 navigator.getUserMedia  = navigator.getUserMedia ||
                         navigator.webkitGetUserMedia ||
