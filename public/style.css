@@ -2,7 +2,6 @@ body{
     margin: 0;
     padding: 0;
 }
-
 #video-grid{
     display: flex;
     flex-wrap:  wrap;
@@ -27,73 +26,11 @@ video{
     
  }
 
-
-@media scream and (min-width:400px){
-    video{
-       
-        max-height: 200px;
-         
-         object-fit: cover;
-         flex:none;
-         width: calc( (100%-10px) / 2 );
-         max-width: 200px;
-         margin-bottom: 10px;
-         
-     
-         display: flex;
-         justify-content: center;
-         align-items: center;
-        
-         
-     
-     }
-}
-@media scream and (min-width:600px){
-   video{
-       
-        max-height: 300px;
-         
-         object-fit: cover;
-         flex:none;
-         width:  calc( (100%-20px) / 3 );
-         max-width: 350px;
-         margin-bottom: 10px;
-         
-     
-         display: flex;
-         justify-content: center;
-         align-items: center;
-        
-         
-     
-     }
-}
-@media scream and (min-width:800px){
-    video{
-      
-        max-height: 300px;
-         
-         object-fit: cover;
-         flex:none;
-         width: calc( (100%-30px) / 4 );
-         max-width: 350px;
-         margin-bottom: 10px;
-         
-     
-         display: flex;
-         justify-content: center;
-         align-items: center;
-       
-     
-     }
-}
-
-
-
-.main{
+ .main{
     height: 100vh;
     display: flex;
 }
+
 
 .main__izquierda{
     flex: 0.8;
@@ -108,7 +45,7 @@ video{
     background-color: black;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 40px;
 }
 
@@ -117,7 +54,8 @@ video{
     background-color: #1C1E20;
     color: #D2D2D2;
     padding: 5px;
-    justify-content: space-between;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .main__controles__panel{
@@ -134,6 +72,21 @@ video{
     cursor: pointer;
 }
 
+.main__controles_button2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    min-width: 100px;
+    min-height: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-color: red;
+    color: white;
+    border-radius: 15px 15px 15px 15px;
+}
+
 .main__controles_button i{
     font-size: 24px;
 }
@@ -144,18 +97,20 @@ video{
 }
 
 .leave_meeting{
-    color: #EB534B;
+    color: white;
 }
 
 .main__derecha{
     flex: 0.2;
     display: flex;
     flex-direction: column;
+    border: 1px solid #4d5858;
 }
 
 .main__header{
     padding-top: 5px;
-    color: #000000;
+    background-color: #eaa11c;
+    color: white;
     text-align: center;
 }
 
@@ -163,11 +118,17 @@ video{
     flex-grow: 1;
     overflow-y: auto;
 
+    background-color:#e9ecef;
+    color: black;
+
 }
 
 .main__message_container{
     padding: 22px 12px;
     display: flex;
+    background-color: white;
+    color: black;
+    
 }
 
 .main__message_container input {
@@ -178,5 +139,9 @@ video{
 }
 
 .tranmition_unmute, .tranmition_stop {
+    display: flex;
+    flex-direction: row;
     color: #CC3B33;
+
+    justify-content: space-around;
 }

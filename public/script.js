@@ -1,4 +1,4 @@
-var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003' : 'https://mrbisne.com:3003' ;
+var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:4000' : 'https://mrbisne.com:4000' ;
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
@@ -225,57 +225,22 @@ const muteUnmute = () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
   if (enabled) {
     myVideoStream.getAudioTracks()[0].enabled = false;
-    setUnmuteButton();
   } else {
-    setMuteButton();
     myVideoStream.getAudioTracks()[0].enabled = true;
   }
+  $('.main__mute_button').toggle();
 }
-
-const setMuteButton = () => {
-  const html = `
-    <i class="fas fa-microphone"></i>
-    <span>Mute</span>
-  `
-  document.querySelector('.main__mute_button').innerHTML = html;
-}
-
-const setUnmuteButton = () => {
-  const html = `
-    <i class="tranmition_unmute fas fa-microphone-slash"></i>
-    <span>Unmute</span>
-  `
-  document.querySelector('.main__mute_button').innerHTML = html;
-} 
 
 //activar y ddeactivar video
 const playStop = () => {
   let enabled = myVideoStream.getVideoTracks()[0].enabled;
   if (enabled) {
     myVideoStream.getVideoTracks()[0].enabled = false;
-    setPlayVideo()
   } else {
-    setStopVideo()
     myVideoStream.getVideoTracks()[0].enabled = true;
   }
+  $('.main__video_button').toggle();
 }
-
-const setStopVideo = () => {
-  const html = `
-    <i class="fas fa-video"></i>
-    <span>Stop Video</span>
-  `
-  document.querySelector('.main__video_button').innerHTML = html;
-}
-
-const setPlayVideo = () => {
-  const html = `
-  <i class="tranmition_stop  fas fa-video-slash"></i>
-    <span>Play Video</span>
-  `
-  document.querySelector('.main__video_button').innerHTML = html;
-}
-
 
 /********************************************************************** */
 //funciones y enevtos de chat
@@ -285,3 +250,8 @@ const scrollToBottom = () => {
   var d = $('.main__chat_window');
   d.scrollTop(d.prop("scrollHeight"));
 }
+
+document.getElementById('main__controles_salir')
+    .addEventListener('click', (e) => {
+      window.open($urlIO+"/profile",'_self')    
+  });
