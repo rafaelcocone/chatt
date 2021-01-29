@@ -1,4 +1,4 @@
-var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:4000' : 'https://mrbisne.com:4000' ;
+var $urlIO =  window.location.hostname == "localhost" ? 'https://localhost:3003' : 'https://192.168.8.2:3003'//'https://mrbisne.com:3003' ;
 const socket = io($urlIO);
 const videoGrid = document.getElementById('video-grid')
 let $sendMensage = $('#chat_message')
@@ -18,15 +18,22 @@ window.onunload = window.onbeforeunload = function(e) {
 };
 
 //inicialiaza peer
+/*
 const myPeer = new Peer(undefined, {
-  host: 'www.mrbisne.com',
+  host: 'mrbisne.com',
  secure:true, 
  port: '3005',
  debug: 3,
  config: {'iceServers':[
                 {'url': 'turn:mrbisne.com', username: 'mrtest', credential: 'mrpass' }
          ]}
-})
+})*/
+const myPeer = new Peer(123, {
+  host: '/',
+  port: 3005,
+  path: '/myapp'
+  
+});
 
 var peerConnection = window.RTCPeerConnection ||
   window.mozRTCPeerConnection ||

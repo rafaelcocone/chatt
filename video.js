@@ -18,8 +18,11 @@ const mysql = require('mysql'),
         waitForConnection: true
       }),
       options = {
-        key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
-        cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')
+        key:  fs.readFileSync('key.pem'),
+        cert: fs.readFileSync('cert.pem')
+        
+        /*key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
+        cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')*/
       };
 var sockets = [];
 //inicializa el servoidor
