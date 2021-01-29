@@ -107,9 +107,9 @@ promise
           
             // when the client emits 'typing', we broadcast it to others
             socket.on('typing', (data) => {
-                socket.to(data.grupos).emit('typing', {
+              socket.to(data.grupos).emit('typing', {
                 username: socket.username
-            });
+              });
             });
         
             // when the client emits 'stop typing', we broadcast it to others
