@@ -16,8 +16,8 @@ const mysql = require('mysql'),
         waitForConnection: true
       }),
       options = {
-        key:  fs.readFileSync('key.pem'),
-        cert: fs.readFileSync('cert.pem')
+        key:  fs.readFileSync('_.mrbisne.com_private_key.key'),
+        cert: fs.readFileSync('mrbisne.com_ssl_certificate.cer')
       };
 //inicializa el servoidor
 //settieng
@@ -137,7 +137,10 @@ promise
   .catch( (err) => {
     console.log('Db:')
     console.log(err)} )
+<<<<<<< HEAD
+=======
 
 
 
     /**/
+>>>>>>> 3ccdb86294fcbb22a14ce4b18d1f12777172b55f
