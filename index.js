@@ -137,10 +137,3 @@ promise
   .catch( (err) => {
     console.log('Db:')
     console.log(err)} )
-<<<<<<< HEAD
-=======
-
-
-
-    /**/
->>>>>>> 3ccdb86294fcbb22a14ce4b18d1f12777172b55f
