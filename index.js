@@ -61,7 +61,7 @@ promise
             let participantes = 0//addRoom(data.id_room)
 
             socket.join('chat-'+data.id_room)
-            console.log(' connection cliente: '.data.id_room);
+            console.log(' connection cliente: '+data.id_room);
             io.in('chat-'+data.id_room).clients((error, clients) => {
                 if (error)  {
                   console.log('Error: connection cliente: '.data.id_room);
@@ -111,6 +111,7 @@ promise
 
               socket.on('new message', (data) => {
                 // we tell the client to execute 'new message'
+                console.log(data)
                 socket.to('chat-'+data.id_room).emit('new message', {//socket.broadcast.emit('new message', {//
                   username: data.username,
                   message:  data.message, 
